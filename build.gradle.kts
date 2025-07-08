@@ -12,6 +12,18 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+
+    // Redis (Lettuce)
+    implementation("io.lettuce:lettuce-core:6.3.0.RELEASE")
+
+    // Jackson
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+
+    // WebClient
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // 로그
+    implementation("org.slf4j:slf4j-simple:2.0.9")
 }
 
 tasks.test {
