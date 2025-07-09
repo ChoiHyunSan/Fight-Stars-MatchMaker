@@ -11,8 +11,8 @@ public class RedisHelper {
 
     public static final RedisCommands<String, String> CMD = CLIENT.connect().sync();
 
-    public static void publishRoom(String serverId, String jsonPayload) {
+    public static void publishRoom(String serverId, String roomInfo) {
         String channel = "conn:" + serverId;
-        CMD.publish(channel, jsonPayload);
+        CMD.publish(channel, roomInfo);
     }
 }
