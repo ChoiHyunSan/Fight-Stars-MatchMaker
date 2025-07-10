@@ -1,5 +1,6 @@
 package fightStars.matchmaker.util;
 
+import fightStars.matchmaker.config.MatchMakerConfig;
 import fightStars.matchmaker.dto.MatchInfo;
 import fightStars.matchmaker.dto.RoomInfo;
 import fightStars.matchmaker.dto.request.RoomCreateRequest;
@@ -15,8 +16,7 @@ public class HttpUtil {
 
     private static final OkHttpClient CLIENT = new OkHttpClient();
 
-    private static final String ROOM_API =
-            System.getenv().getOrDefault("ROOM_API", "http://localhost:2666/api/v1/rooms");
+    private static final String ROOM_API = MatchMakerConfig.ROOM_API;
     private static final Logger log = LoggerFactory.getLogger(HttpUtil.class);
 
     public static RoomCreateResponse createRoom(RoomCreateRequest request) {

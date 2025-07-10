@@ -33,7 +33,7 @@ public class MatchPoolWorker implements Runnable {
         String queueKey = "match:queue:" + mode;
 
         while (true) {
-            // Blocking Pop 결과 처리
+            // BLPOP을 통해 Mode에 해당하는 매칭 정보를 꺼내어 확인
             var kv = redis.blpop(Duration.ofSeconds(2).toSeconds(), queueKey);
             String json = kv == null ? null : kv.getValue();
             if (json != null)
@@ -41,7 +41,7 @@ public class MatchPoolWorker implements Runnable {
 
             if (bucket.size() < teamSize) continue;
 
-            // 1) in_match 검사
+            // 1) in_match 검사를 통해 매칭할 유저들이 아직 매칭을 대기중인지 확인
             List<String> keys = bucket.stream()
                     .map(r -> "in_match:" + r.userId())
                     .toList();
@@ -49,16 +49,22 @@ public class MatchPoolWorker implements Runnable {
             if (!allAlive) { requeueValid(bucket, redis, queueKey); bucket.clear(); continue; }
 
             // 2) Lua 원자 DEL
-            String lua = "for i=1,#KEYS do if redis.call('DEL', KEYS[i])==0 then return 0 end end return 1";
+            String lua = """
+                for i = 1, #KEYS do 
+                    if redis.call('DEL', KEYS[i]) == 0 then 
+                        return 0 
+                    end 
+                end 
+                return 1
+            """;
             Long ok = redis.eval(lua, ScriptOutputType.INTEGER,
                     keys.toArray(new String[0]),      // KEYS
                     new String[0]);                   // ARGV(없음)
             if (ok == 0) { requeueValid(bucket, redis, queueKey); bucket.clear(); continue; }
 
-            // 3) 방 생성·통지
+            // 3) 방 생성 요청 후, 방 정보를 유저들이 대기중인 서버들에 전달
             RoomCreateResponse response = RoomCreateHelper.createRoom(bucket);
             if(response == null){ requeueValid(bucket, redis, queueKey); bucket.clear(); continue; }
-
             for (MatchInfo r : bucket) {
                 RoomInfo roomInfo = RoomInfo.create(response, r.userId());
                 RedisHelper.publishRoom(r.connectionServerId(), JsonUtil.toJson(roomInfo));
