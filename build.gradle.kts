@@ -24,6 +24,11 @@ dependencies {
 
     // 로그
     implementation("org.slf4j:slf4j-simple:2.0.9")
+
+    // JWT
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 }
 
 tasks.test {

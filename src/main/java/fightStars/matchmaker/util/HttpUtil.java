@@ -21,7 +21,12 @@ public class HttpUtil {
 
     public static RoomCreateResponse createRoom(RoomCreateRequest request) {
         RequestBody body = RequestBody.create(JsonUtil.toJson(request), MediaType.get("application/json"));
-        Request req = new Request.Builder().url(ROOM_API).post(body).build();
+        Request req = new Request.Builder()
+            .url(ROOM_API)
+            .header("Content-Type", "application/json")
+            .header("Authorization", "Bearer " + JwtUtil.generateServerToken())
+            .post(body)
+            .build();
 
         try (Response res = CLIENT.newCall(req).execute()) {
             return JsonUtil.fromJson(res.body().string(), RoomCreateResponse.class);
